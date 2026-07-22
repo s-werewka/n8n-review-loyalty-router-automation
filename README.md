@@ -1,7 +1,9 @@
 # n8n-review-loyalty-router-automation
 🚀 Automated Customer Feedback & Incident Management System
+
 Automatyczny system do zbierania, analizowania i zarządzania opiniami klientów oparty na n8n, OpenAI, Twilio, Google Sheets oraz Telegramie.
 System automatycznie wysyła spersonalizowane formularze po wizycie klienta, analizuje poziom zadowolenia, kategoryzuje negatywny feedback za pomocą sztucznej inteligencji i natychmiastowo alarmuje zespół na Telegramie.
+
 🌟 Kluczowe Funkcje
 •	Personalizowane wiadomości SMS: Automatyczna wysyłka linków do formularza przez Twilio z unikalnymi parametrami URL.
 •	Bezpieczny przesył danych (Hidden Fields): Dane klienta są przekazywane bezszwowo w tle między krokami formularza.
@@ -9,12 +11,14 @@ System automatycznie wysyła spersonalizowane formularze po wizycie klienta, ana
 •	Baza danych w Google Sheets: Rejestracja opinii z interaktywną listą rozwijaną (Dropdown) do zarządzania statusami zgłoszeń (Nowe, W trakcie, Zakończono).
 •	Powiadomienia Telegram: Natychmiastowe alerty dla zespołu w przypadku ocen 1–3★ z pełnym podsumowaniem i opcją szybkiego reagowania.
 •	Obsługa Błędów (Error Handling): Dedykowany workflow wyłapujący awarie API (Error Trigger) z alertami na Telegramie.
+
 🔄 Elastyczność i Triggery
 System został zaprojektowany w sposób modułowy. Choć domyślnie proces inicjowany jest przez zdarzenia w skrzynce pocztowej (Gmail), dzięki architektury n8n wyzwalacz (Trigger) można łatwo podmienić na:
 •	Google Sheets Trigger: Uruchomienie automatyzacji po dodaniu nowego wiersza w arkuszu.
 •	Webhook / HTTP Request: Integracja z dowolnym zewnętrznym systemem CRM, sklepem internetowym lub aplikacją webową.
 •	Schedule Trigger: Cykliczne sprawdzanie bazy danych o określonych godzinach.
 •	Inne integracje: Zapier, Typeform, PostgreSQL, CRM (HubSpot, Pipedrive itp.).
+
 🛠️ Architektura i Przepływ Procesu (Workflow)
 	1.	Trigger: Wykrycie zdarzenia (Gmail / Google Sheets / Webhook HTTP).
 	2.	Twilio: Generowanie i wysyłka wiadomości SMS z unikalnym linkiem do formularza.
@@ -25,6 +29,7 @@ System został zaprojektowany w sposób modułowy. Choć domyślnie proces inicj
 	5.	OpenAI (GPT): Analiza tekstu, wyciągnięcie pilności, kategoryzacja i propozycja odpowiedzi.
 	6.	Google Sheets: Zapis kompletu danych ze statusem 🔴 Nowe.
 	7.	Telegram: Alert do zespołu z podsumowaniem i opcją zmiany statusu.
+
 ⚙️ Wymagania i Konfiguracja
 	1.	Instancja n8n (Cloud lub Self-hosted).
 	2.	Konta API / Usługi:
