@@ -40,21 +40,35 @@ System został zaprojektowany w sposób modułowy. Choć domyślnie proces inicj
 	3.	n8n Form Submission: Pr przechwycenie odpowiedzi klienta wraz z danymi ukrytymi (imie, nazwisko, telefon, data_wizyty).
 	
 	4.	Switch Node:
+
 •	4–5★ (Pozytywna): Bezpośredni zapis do Google Sheets + strona podziękowania.
+
 •	1–3★ (Negatywna): Przekierowanie do formularza szczegółowego opisu problemu.
+	
 	5.	OpenAI (GPT): Analiza tekstu, wyciągnięcie pilności, kategoryzacja i propozycja odpowiedzi.
+	
 	6.	Google Sheets: Zapis kompletu danych ze statusem 🔴 Nowe.
+	
 	7.	Telegram: Alert do zespołu z podsumowaniem i opcją zmiany statusu.
 
 ⚙️ Wymagania i Konfiguracja
+	
 	1.	Instancja n8n (Cloud lub Self-hosted).
+	
 	2.	Konta API / Usługi:
+
 •	OpenAI API Key
+
 •	Twilio Account SID & Auth Token
+
 •	Telegram Bot Token
+
 •	Google Workspace (Google Sheets API)
+
 	3.	Krok po kroku:
+
 •	Zaimportuj plik .json z przepływem do n8n.
+
 •	Połącz swoje poświadczenia (Credentials) dla Google, OpenAI, Twilio i Telegrama.
 •	Stwórz plik w Google Sheets z odpowiednimi kolumnami i regułą sprawdzania danych dla pola Status.
 •	Aktywuj dedykowany workflow do obsługi błędów (Error Trigger) i wskaż go w ustawieniach głównego przepływu.
