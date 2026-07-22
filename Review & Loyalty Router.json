@@ -1,0 +1,911 @@
+{
+  "name": "Review & Loyalty Router",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -432,
+        16
+      ],
+      "id": "a6be652a-bdf7-49bd-aa20-fab1f60a6547",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "N48mhOEfSMdM4goC",
+          "name": "werewkastasiu@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        16
+      ],
+      "id": "42282de6-3171-4990-9fbd-8fa93d3b32c5",
+      "name": "Wait",
+      "webhookId": "0719c120-c93f-48dd-80ed-be2fd5852de8"
+    },
+    {
+      "parameters": {
+        "from": "+12183003714",
+        "to": "=+48534850951",
+        "message": "=https://werewkastas.app.n8n.cloud/form/9de9e411-bfc7-4fc0-9e62-a5e2fdc72b68?imie={{ $json.output[0].content[0].text.imie }}&nazwisko={{ $json.output[0].content[0].text.nazwisko }}&telefon={{ $json.output[0].content[0].text.telefon }}&data_wizyty={{ $json.output[0].content[0].text.data_wizyty }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        256,
+        16
+      ],
+      "id": "978c2bba-82e3-4a39-91b2-8a0437477f34",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "QSWSzvNMNyrlRQxA",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Twoim jedynym zadaniem jest przeanalizowanie treści e-maila i wyciągnięcie z niego danych klienta w czystym formacie JSON.\nWymagane pola w wyjściowym obiekcie JSON:\n•\timie: Samo imię klienta (z pierwszej litery wielką, np. \"Jan\").\n•\tnazwisko: Nazwisko klienta (opcjonalnie, jeśli brak – zwróć null).\n•\ttelefon: Numer telefonu sprowadzony wyłącznie do cyfr, zaczynając od kierunkowego Polski, np. +48123456789 (usuń spacje, myślniki i nawiasy). Jeśli brakuje kierunkowego, dodaj +48.\n•\tdata_wizyty: Data i godzina wizyty w formacie YYYY-MM-DD HH:mm (jeśli w e-mailu podano tylko godzinę, załóż dzisiejszą datę).\nZasady:\n\t1.\tOdpowiadaj WYŁĄCZNIE czystym kodem JSON. Nie dodawaj wstępu, podsumowań ani znaczników markdown (nie używaj ```json).\n\t2.\tJeśli jakiegoś pola nie ma w treści e-maila, wpisz dla niego wartość null."
+            },
+            {
+              "content": "=Przeanalizuj poniższy e-mail i wyciągnij dane:\n {{ $('Gmail Trigger').item.json.snippet }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          },
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -32,
+        16
+      ],
+      "id": "38bf1ddd-2e36-4ddc-9074-dc0a877355df",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "iC0rPhpds7bBIPjw",
+          "name": "api; me"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Oceń swoją wizytę",
+        "formDescription": "Twój głos pomaga nam podnosić jakość usług. Wybierz ocenę w skali 1–5.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Ocena",
+              "fieldType": "dropdown",
+              "fieldName": "ocena",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1 ⭐ - Tragedia"
+                  },
+                  {
+                    "option": "2 ⭐ - Bardzo słabo"
+                  },
+                  {
+                    "option": "3 ⭐ - Słabo"
+                  },
+                  {
+                    "option": "4 ⭐ - Dobrze"
+                  },
+                  {
+                    "option": "5 ⭐ - Bardzo dobrze"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "id",
+              "fieldValue": "={{ $json.query.id }}"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "imie",
+              "fieldValue": "={{ $json.query.imie }}"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "nazwisko",
+              "fieldValue": "={{ $json.query.nazwisko }}"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "email",
+              "fieldValue": "={{ $json.query.email }}"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "telefon",
+              "fieldValue": "={{ $json.query.telefon }}"
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "data_wizyty",
+              "fieldValue": "={{ $json.query.data_wizyty }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -432,
+        448
+      ],
+      "id": "1796e0c0-d0b1-4f40-a0dc-39453b9e3761",
+      "name": "On form submission",
+      "webhookId": "9de9e411-bfc7-4fc0-9e62-a5e2fdc72b68"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ocena }}",
+                    "rightValue": "5 ⭐ - Bardzo dobrze",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b11cd86d-a114-4b7a-a8ed-f858fc9638f0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "5 gwiazdek"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6cfed0d1-4d62-4bd0-88c6-d02ae39dfd2b",
+                    "leftValue": "={{ $json.ocena }}",
+                    "rightValue": "4 ⭐ - Dobrze",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "4 gwiazdki"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        432
+      ],
+      "id": "65af39cc-ef8d-41e3-9d37-37ff4dc517c6",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Dziękujemy za ocenę 5/5! ⭐",
+        "completionMessage": "Bardzo się cieszymy, że wizyta spełniła Twoje oczekiwania! \n\nJeśli masz wolną chwilę, będziemy ogromnie wdzięczni za <a href=\"https://docs.google.com/document/d/1QF58xBoYv2hJz7WtrBCC5ubzd2AJ7EGZLJ_3_-HRP9U/edit?usp=sharing\" target=\"_blank\">zostawienie opinii w Google</a>.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        160,
+        288
+      ],
+      "id": "3fc28530-821c-45c9-939d-df81b171fb02",
+      "name": "Form",
+      "webhookId": "20fcc7f5-9826-488c-96d8-33f82fb5f139"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Dziękujemy za ocenę 4/5! ⭐⭐⭐⭐",
+        "completionMessage": "Bardzo dziękujemy! Cieszymy się, że wizyta była udana. \n\nNieustannie pracujemy nad tym, aby nasze usługi były na 5 gwiazdek. Jeśli masz chwilę, podziel się swoją opinią lub poleć nas znajomym:\n\n<a href=\"https://docs.google.com/document/d/1AcC5CJtagnRjr0fl4IIZipHhEyUXTgVBamnvnSuwHnE/edit?usp=sharing\" target=\"_blank\">Kliknij tutaj, aby zostawić krótką opinię</a>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        160,
+        448
+      ],
+      "id": "63c059be-9243-4d9a-b1d5-792c353f79ed",
+      "name": "Form1",
+      "webhookId": "47733ce3-d59f-4c74-bc8c-8c96f3a3a1d8"
+    },
+    {
+      "parameters": {
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Co możemy poprawić, aby kolejnym razem otrzymać 5 gwiazdek?",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {
+          "formDescription": "=Widzimy, że Twoja ocena to {{ $('On form submission').item.json.ocena }}. Napisz nam, co poszło nie tak i co możemy zmienić."
+        }
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        624
+      ],
+      "id": "29caff27-d017-42ee-a1ef-3e6f87e6a563",
+      "name": "Form2",
+      "webhookId": "eb533d52-09ce-473b-a2ea-dc751bc95850"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Przeanalizuj poniższy feedback od klienta i zwróć go w czystym formacie JSON bez zbędnych wstępów:\n\nOcena klienta: {{ $('On form submission').item.json.ocena }}\nKomentarz: {{ $json['Co możemy poprawić, aby kolejnym razem otrzymać 5 gwiazdek?'] }}\n\nZwróć pola:\n- kategoria: (wybierz jedną z: Obsługa / Czas oczekiwania / Jakość usługi / Ceny / Inne)\n- pilnosc: (Wysoka / Średnia / Niska)\n- podsumowanie: (krótkie, 1-zdaniowe podsumowanie problemu)\n- sugerowana_reakcja: (krótka wskazówka dla nas, co najlepiej odpowiedzieć klientowi)"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        624
+      ],
+      "id": "3d8833ac-5536-4b93-82d4-fd7f58e40b28",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "iC0rPhpds7bBIPjw",
+          "name": "api; me"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8955777818",
+        "text": "=⚠️ **Niezadowolony klient – wymagana reakcja!**\n\n👤 **Dane klienta:**\n• **Imię i nazwisko:** {{ $node[\"On form submission\"].json.imie || $node[\"On form submission\"].json.query?.imie || \"Brak\" }} {{ $node[\"On form submission\"].json.nazwisko || $node[\"On form submission\"].json.query?.nazwisko || \"\" }}\n• **E-mail:** {{ $node[\"On form submission\"].json.email || $node[\"On form submission\"].json.query?.email || \"Brak\" }}\n• **Telefon:** +{{ $node[\"On form submission\"].json.telefon || $node[\"On form submission\"].json.query?.telefon || \"Brak\" }}\n📅 **Data wizyty:** {{ $node[\"On form submission\"].json.data_wizyty || $node[\"On form submission\"].json.query?.data_wizyty || \"Brak\" }}\n\n⭐ **Ocena:** {{ $node[\"Switch\"].json.ocena }}\n🏷️ **Kategoria:** {{ $json.output[0].content[0].text.kategoria }}\n🔥 **Pilność:** {{ $json.output[0].content[0].text.pilnosc }}\n\n💬 **Komentarz klienta:**\n\"{{ $('Form2').item.json['Co możemy poprawić, aby kolejnym razem otrzymać 5 gwiazdek?'] }}\"\n\n📝 **Podsumowanie AI:**\n{{ $json.output[0].content[0].text.podsumowanie }}\n\n💡 **Sugerowana reakcja:**\n{{ $json.output[0].content[0].text.sugerowana_reakcja }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        624
+      ],
+      "id": "732f01a7-8475-4e4b-a849-20fb4d5cbc91",
+      "name": "Send a text message",
+      "webhookId": "b3dcc0b3-ab98-4a8e-8385-ce71878390a0",
+      "credentials": {
+        "telegramApi": {
+          "id": "Jon2tTrsgsdpjGF9",
+          "name": "FRANKSON"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Dziękujemy za przesłanie uwag!",
+        "completionMessage": "Twoja opinia trafiła bezpośrednio do naszego zespołu. Przeanalizujemy ją i skontaktujemy się z Tobą w celu wyjaśnienia sprawy.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        816,
+        624
+      ],
+      "id": "e7317bed-a98f-4ee2-99fa-4faa9dd57caa",
+      "name": "Form3",
+      "webhookId": "ec42ceef-8983-4c32-a9ac-ea7939e55f28"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY",
+          "mode": "list",
+          "cachedResultName": "Oceny klientow bangbang",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Arkusz1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $node[\"On form submission\"].json.data_wizyty }}",
+            "Ocena": "={{ $node[\"Switch\"].json.ocena }}",
+            "Imię i Nazwisko": "={{ $node[\"On form submission\"].json.imie }} {{ $node[\"On form submission\"].json.nazwisko }}",
+            "Telefon": "=+{{ $node[\"On form submission\"].json.telefon }}",
+            "E-mail": "={{ $node[\"On form submission\"].json.email }}",
+            "Kategoria AI": "={{ $json.output[0].content[0].text.kategoria }}",
+            "Pilność AI": "={{ $json.output[0].content[0].text.pilnosc }}",
+            "Komentarz": "={{ $('Form2').item.json['Co możemy poprawić, aby kolejnym razem otrzymać 5 gwiazdek?'] }}",
+            "Status": "Nowe"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ocena",
+              "displayName": "Ocena",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Komentarz",
+              "displayName": "Komentarz",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kategoria AI",
+              "displayName": "Kategoria AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pilność AI",
+              "displayName": "Pilność AI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Imię i Nazwisko",
+              "displayName": "Imię i Nazwisko",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Telefon",
+              "displayName": "Telefon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        624
+      ],
+      "id": "bb5713a3-2fd5-4691-a167-fbd990336d60",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lTklSGCA6Hqn4oNH",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY",
+          "mode": "list",
+          "cachedResultName": "Oceny klientow bangbang",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2043596645,
+          "mode": "list",
+          "cachedResultName": "Oceny 5",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY/edit#gid=2043596645"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $node[\"On form submission\"].json.data_wizyty }}",
+            "Imię i Nazwisko": "={{ $node[\"On form submission\"].json.imie }} {{ $node[\"On form submission\"].json.nazwisko }}",
+            "Telefon": "={{ $node[\"On form submission\"].json.telefon }}",
+            "Ocena": "={{ $node[\"Switch\"].json.ocena }}",
+            "E-mail": "={{ $node[\"On form submission\"].json.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ocena",
+              "displayName": "Ocena",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Imię i Nazwisko",
+              "displayName": "Imię i Nazwisko",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Telefon",
+              "displayName": "Telefon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        288
+      ],
+      "id": "8d3eb82c-4b44-4682-9faa-42da56fe3134",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lTklSGCA6Hqn4oNH",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY",
+          "mode": "list",
+          "cachedResultName": "Oceny klientow bangbang",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 449296091,
+          "mode": "list",
+          "cachedResultName": "Oceny 4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fHymU-CUwnARY0nDDfa9_B-6WFoxsn4dszIse_R_vlY/edit#gid=449296091"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $node[\"On form submission\"].json.data_wizyty }}",
+            "Ocena": "={{ $node[\"Switch\"].json.ocena }}",
+            "Telefon": "={{ $node[\"On form submission\"].json.telefon }}",
+            "Imię i Nazwisko": "={{ $node[\"On form submission\"].json.imie }} {{ $node[\"On form submission\"].json.nazwisko }}",
+            "E-mail": "={{ $node[\"On form submission\"].json.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ocena",
+              "displayName": "Ocena",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Imię i Nazwisko",
+              "displayName": "Imię i Nazwisko",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefon",
+              "displayName": "Telefon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        432
+      ],
+      "id": "7fc24340-e251-4097-8f71-a0cb8f1be240",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lTklSGCA6Hqn4oNH",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "19f89de28c1ad663",
+          "threadId": "19f89de28c1ad663",
+          "snippet": "Wizyta Pacjenta Michal Pan została zakończona. Numer telefonu pacjenta: +48 534 850 951",
+          "payload": {
+            "mimeType": "multipart/alternative"
+          },
+          "sizeEstimate": 7185,
+          "historyId": "708070",
+          "internalDate": "1784724454000",
+          "labels": [
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "CATEGORY_PERSONAL",
+              "name": "CATEGORY_PERSONAL"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "From": "\"Stanisław Werewka\" <werewka.stas@gmail.com>",
+          "Subject": "Wizyta",
+          "To": "werewkastasiu@gmail.com"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Form2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form2": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Form3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Form1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "88abb23c-3532-4e58-bcdf-ee572f46eb64",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "afdd7c7f9c788226d2e3c76e9233b868ba8dcced4ecd9bae92237ed76e9755b7"
+  },
+  "nodeGroups": [],
+  "id": "4gIDpkM7nfIkYD3E",
+  "tags": []
+}
