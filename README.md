@@ -54,10 +54,14 @@ The system features a modular architecture. While initialized by email events (G
 
                            │
                            ▼
+						
                    [Google Sheets Log]
+				   
                            │
                            ▼
-                   [Telegram Alert]
+                   
+				   [Telegram Alert]
+				   
 
 	
 	1.	Trigger: Event detection (Gmail / Google Sheets / HTTP Webhook).
