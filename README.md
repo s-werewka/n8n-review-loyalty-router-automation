@@ -1,61 +1,85 @@
 # n8n-review-loyalty-router-automation
 🚀 Automated Customer Feedback & Incident Management System
+An automated system for collecting, analyzing, and managing customer feedback powered by n8n, OpenAI, Twilio, Google Sheets, and Telegram. The system automatically dispatches personalized post-visit surveys, analyzes satisfaction levels, categorizes negative feedback using AI, and alerts the team instantly on Telegram.
 
-Automatyczny system do zbierania, analizowania i zarządzania opiniami klientów oparty na n8n, OpenAI, Twilio, Google Sheets oraz Telegramie.
-System automatycznie wysyła spersonalizowane formularze po wizycie klienta, analizuje poziom zadowolenia, kategoryzuje negatywny feedback za pomocą sztucznej inteligencji i natychmiastowo alarmuje zespół na Telegramie.
+🌟 Key Features
 
-🌟 Kluczowe Funkcje
+•	Personalized SMS Messaging: Automated dispatch of survey links via Twilio with unique URL parameters.
 
-•	Personalizowane wiadomości SMS: Automatyczna wysyłka linków do formularza przez Twilio z unikalnymi parametrami URL.
+•	Secure Data Transfer (Hidden Fields): Customer details pass seamlessly in the background across form steps.
 
-•	Bezpieczny przesył danych (Hidden Fields): Dane klienta są przekazywane bezszwowo w tle między krokami formularza.
+•	AI-Powered Intelligence (OpenAI): Automated urgency evaluation, issue categorization, summary generation, and response drafting for team members.
 
-•	Inteligentna analiza AI (OpenAI): Automatyczna ocena pilności, kategoryzacja problemu oraz generowanie podsumowania i sugerowanej 
-reakcji dla zespołu.
+•	Google Sheets Database: Logs feedback featuring an interactive dropdown menu to manage ticket statuses (New, In Progress, Completed).
 
-•	Baza danych w Google Sheets: Rejestracja opinii z interaktywną listą rozwijaną (Dropdown) do zarządzania statusami zgłoszeń (Nowe, W 
-trakcie, Zakończono).
+•	Telegram Incident Alerts: Instant alerts sent to the team for 1–3★ ratings, featuring a full summary and quick-response capabilities.
 
-•	Powiadomienia Telegram: Natychmiastowe alerty dla zespołu w przypadku ocen 1–3★ z pełnym podsumowaniem i opcją szybkiego reagowania.
+•	Error Handling: A dedicated error-catching workflow (Error Trigger) that dispatches failure alerts to Telegram.
 
-•	Obsługa Błędów (Error Handling): Dedykowany workflow wyłapujący awarie API (Error Trigger) z alertami na Telegramie.
+🔄 Modular Triggers & Flexibility
+The system features a modular architecture. While initialized by email events (Gmail) by default, the n8n trigger can easily be swapped for:
 
-🔄 Elastyczność i Triggery
-System został zaprojektowany w sposób modułowy. Choć domyślnie proces inicjowany jest przez zdarzenia w skrzynce pocztowej (Gmail), dzięki architektury n8n wyzwalacz (Trigger) można łatwo podmienić na:
+•	Google Sheets Trigger: Runs automation when a new row is appended to a sheet.
 
-•	Google Sheets Trigger: Uruchomienie automatyzacji po dodaniu nowego wiersza w arkuszu.
+•	Webhook / HTTP Request: Integrates with external CRMs, e-commerce platforms, or custom web apps.
 
-•	Webhook / HTTP Request: Integracja z dowolnym zewnętrznym systemem CRM, sklepem internetowym lub aplikacją webową.
+•	Schedule Trigger: Periodically polls databases at specified time intervals.
 
-•	Schedule Trigger: Cykliczne sprawdzanie bazy danych o określonych godzinach.
+•	Third-Party Integrations: Connects with Zapier, Typeform, PostgreSQL, HubSpot, Pipedrive, and more.
 
-•	Inne integracje: Zapier, Typeform, PostgreSQL, CRM (HubSpot, Pipedrive itp.).
 
-🛠️ Architektura i Przepływ Procesu (Workflow)
+🛠️ System Architecture & Workflow
 
-	1.	Trigger: Wykrycie zdarzenia (Gmail / Google Sheets / Webhook HTTP).
+[Trigger (Gmail / Sheets / Webhook)] 
+                 │
+                 ▼
+     [Twilio: Dispatch SMS Link]
+                 │
+                 ▼
+     [n8n Form Submission Ingest]
+                 │
+                 ▼
+           [Switch Node]
+           /           \
+   (4–5★ Rating)     (1–3★ Rating)
+        │                  │
+        ▼                  ▼
+[Google Sheets Log]  [Detailed Feedback Form]
+        │                  │
+        ▼                  ▼
+[Thank You Page]     [OpenAI Analysis Engine]
+                           │
+                           ▼
+                   [Google Sheets Log]
+                           │
+                           ▼
+                   [Telegram Alert]
+
 	
-	2.	Twilio: Generowanie i wysyłka wiadomości SMS z unikalnym linkiem do formularza.
+	1.	Trigger: Event detection (Gmail / Google Sheets / HTTP Webhook).
 	
-	3.	n8n Form Submission: Pr przechwycenie odpowiedzi klienta wraz z danymi ukrytymi (imie, nazwisko, telefon, data_wizyty).
+	2.	Twilio: Generates and dispatches an SMS containing a unique survey link.
+	
+	3.	n8n Form Submission: Captures customer responses alongside hidden payload data (first_name, last_name, phone, visit_date).
 	
 	4.	Switch Node:
 
-•	4–5★ (Pozytywna): Bezpośredni zapis do Google Sheets + strona podziękowania.
+•	4–5★ (Positive): Direct log to Google Sheets and displays a thank-you page.
 
-•	1–3★ (Negatywna): Przekierowanie do formularza szczegółowego opisu problemu.
-	
-	5.	OpenAI (GPT): Analiza tekstu, wyciągnięcie pilności, kategoryzacja i propozycja odpowiedzi.
-	
-	6.	Google Sheets: Zapis kompletu danych ze statusem 🔴 Nowe.
-	
-	7.	Telegram: Alert do zespołu z podsumowaniem i opcją zmiany statusu.
+•	1–3★ (Negative): Redirects to a detailed issue report form.
 
-⚙️ Wymagania i Konfiguracja
+	5.	OpenAI (GPT): Analyzes text input, determines urgency, categorizes the incident, and drafts a proposed reply.
 	
-	1.	Instancja n8n (Cloud lub Self-hosted).
+	6.	Google Sheets: Logs complete data entries marked with status 🔴 New.
 	
-	2.	Konta API / Usługi:
+	7.	Telegram: Alerts team members with an incident summary and status management capabilities.
+
+
+⚙️ Requirements & Configuration
+	
+	1.	n8n Instance (Cloud or Self-hosted).
+	
+	2.	API Accounts & Credentials:
 
 •	OpenAI API Key
 
@@ -64,11 +88,13 @@ System został zaprojektowany w sposób modułowy. Choć domyślnie proces inicj
 •	Telegram Bot Token
 
 •	Google Workspace (Google Sheets API)
+	
+	3.	Step-by-Step Setup:
 
-	3.	Krok po kroku:
+•	Import the workflow.json file into your n8n instance.
 
-•	Zaimportuj plik .json z przepływem do n8n.
+•	Connect your Google, OpenAI, Twilio, and Telegram credentials.
 
-•	Połącz swoje poświadczenia (Credentials) dla Google, OpenAI, Twilio i Telegrama.
-•	Stwórz plik w Google Sheets z odpowiednimi kolumnami i regułą sprawdzania danych dla pola Status.
-•	Aktywuj dedykowany workflow do obsługi błędów (Error Trigger) i wskaż go w ustawieniach głównego przepływu.
+•	Create a Google Sheet featuring matching columns and a Data Validation rule for the Status field.
+
+•	Activate the dedicated error-handling workflow (Error Trigger) and link it in the primary workflow settings.
