@@ -31,6 +31,7 @@ The system features a modular architecture. While initialized by email events (G
 🛠️ System Architecture & Workflow
 
 [Trigger (Gmail / Sheets / Webhook)] 
+
                  │
                  ▼
      [Twilio: Dispatch SMS Link]
@@ -42,12 +43,15 @@ The system features a modular architecture. While initialized by email events (G
            [Switch Node]
            /           \
    (4–5★ Rating)     (1–3★ Rating)
+   
         │                  │
         ▼                  ▼
 [Google Sheets Log]  [Detailed Feedback Form]
+
         │                  │
         ▼                  ▼
 [Thank You Page]     [OpenAI Analysis Engine]
+
                            │
                            ▼
                    [Google Sheets Log]
